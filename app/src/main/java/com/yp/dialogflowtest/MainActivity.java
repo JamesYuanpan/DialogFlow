@@ -142,6 +142,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //初始化识别UI
     public void initSpeech(final Context context){
+
+        if (mStt.isSpeaking()){
+            mStt.stopSpeaking();
+        }
+
         final RecognizerDialog mDialog = new RecognizerDialog(context,mInitListener);
         map.clear();
 
@@ -214,6 +219,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
 
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mStt != null){
+            mStt.destroy();
+        }
+    }
 
     //输出文字到文本框
     public String printResult(RecognizerResult recognizerResult){
@@ -276,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             Request request = new Request.Builder()
                     .url(URL)
-                    .addHeader("Authorization","Bearer ya29.c.El8FB6IQv47EQXN7DUg0NvhIEydkNaQOPqhGgI8HAUhKKDE-M_VEEA6CV5iCSXjl-HGax6OnGaHJluxYBMcf5547T70ppDnqfXv0kQnH1Lx3swVQ2tAO8KFsGf6PEMrS2A")
+                    .addHeader("Authorization","Bearer ya29.c.EloIB6WoaPzJqD3KIuUZgDZSy50fhHOY3BwmO0Ba1_yiW4t1dQxUOR-eYiSvBJKlvya36-xDojfaNhWn04QP2pprZy64-KgMSC7FPv2XOsP85XMjv2JIqMTVSxc")
                     .addHeader("Content-Type","application/json;charset:utf-8")
                     .post(body)
                     .build();
@@ -303,6 +315,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         getWeatherInfo(cityName);
                                     }else {
 //                                        setShowText(string,"ROBOT");
+
+                                        if (mStt.isSpeaking()){
+                                            mStt.stopSpeaking();
+                                        }
+
+                                        if (string == null){
+                                            string = "不好意思，我听不懂这句话";
+                                        }
+
                                         Message message = new Message("ROBOT",string,Message.Type.ROBOT_NORMAL);
                                         messageList.add(message);
                                         adapter.notifyDataSetChanged();
@@ -387,6 +408,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 weatherInfo.setWind_spd(dailyForecast.wind_spd);
                 weatherInfo.setWind_dir(dailyForecast.wind_dir);
 
+                if (mStt.isSpeaking()){
+                    mStt.stopSpeaking();
+                }
+
                 Message message = new Message("ROBOT","",Message.Type.ROBOT_WEATHER);
                 message.setWeatherInfo(weatherInfo);
 
@@ -407,6 +432,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         if (hasDate == false){
+
+            if (mStt.isSpeaking()){
+                mStt.stopSpeaking();
+            }
+
             Message message = new Message("ROBOT","您只能查询最近三天的天气哦！",Message.Type.ROBOT_NORMAL);
             messageList.add(message);
             adapter.notifyDataSetChanged();
